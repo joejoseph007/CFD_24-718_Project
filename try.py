@@ -221,7 +221,7 @@ def main():
     nu = 1.569e-5
     alpha_T = 2.239e-5
     alpha_pollutant = 2.239e-5
-    total_t = 0.1
+    total_t = 0.01
     t = 0
     dt = 0.001
     g = 10

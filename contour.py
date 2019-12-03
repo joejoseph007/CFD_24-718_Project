@@ -64,6 +64,8 @@ def Contour(Scalar_name,time=-1,show='yes',P='no'): #scalar must be string of wh
             times.append('Results/'+i)
     if time==-1:
         Scalar=read_scalar(times[time]+'/'+Scalar_name+'.txt')
+    elif time=='0':
+        Scalar=read_scalar(str(time)+'/'+Scalar_name+'.txt')
     else: 
         Scalar=read_scalar('Results/'+str(time)+'/'+Scalar_name+'.txt')
     Points=read_points('Constant/Points.txt')
@@ -75,8 +77,46 @@ def Contour(Scalar_name,time=-1,show='yes',P='no'): #scalar must be string of wh
         Scalar=copy.deepcopy(averaging(Scalar,0))
     else:
         Scalar=copy.deepcopy(Scalar[1:-1,1:-1])
+    
     plotting(Points,Scalar,Scalar_name,show,P)
 
 
+def Streamlines(U_name,V_name,time=-1,show='yes'):
+    times=[]
+    files=os.listdir('Results')
+    for i in files:
+        if isfloat(i):
+            times.append('Results/'+i)
+    if time==-1:
+        U=read_scalar(times[time]+'/'+U_name+'.txt')
+        V=read_scalar(times[time]+'/'+V_name+'.txt')
+        
+    else: 
+        # U=read_scalar('Results/'+str(time)+'/'+U_name+'.txt')
+        # V=read_scalar('Results/'+str(time)+'/'+V_name+'.txt')
+        U=read_scalar(str(time)+'/'+U_name+'.txt')
+        V=read_scalar(str(time)+'/'+V_name+'.txt')
+        
+    Points=read_points('Constant/Points.txt')
+    Points=copy.deepcopy(Point_average(Points))
+    
+    #if U_name=='U':
+    U=copy.deepcopy(averaging(U,1))
+    V=copy.deepcopy(averaging(V,0))
+    
+    
+    print(U.shape)
+    print(V.shape)
+    print(Points[0].shape)
+    print(Points[1].shape)
+    
+    
+    speed=np.sqrt(U**2 + V**2)
+    #lw=10*speed**0.3/np.max(speed)
+    lw=10
+    plt.streamplot(Points[0][0],Points[1][0,:], U, V, linewidth=lw, cmap='Spectral',density=3)#,minlength=dx/10)
+    plt.show()    
 
-# Contour('U','0',P='yes')
+# Streamlines('U','V','0')
+
+#Contour('U','0',P='yes')
