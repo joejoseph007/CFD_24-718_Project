@@ -22,11 +22,11 @@ def initialize():
     try:
         shutil.rmtree('Constant')
         shutil.rmtree('Results')
-        
     except:
         print('whatever this is')
     try:
         os.makedirs('Constant/')
+        # os.makedirs('Results/')
         os.makedirs('0/')
     except:
         print('Running')
@@ -70,7 +70,7 @@ def initialize():
 
     U_in=np.linspace(0,1,ny+1)
     U=np.zeros([nx+1,ny+1])
-    U[0,:]= 1.#U_in
+    U[0,:]= 1
     # print(U)
     write_scalar('0/U.txt',U)
 
@@ -79,7 +79,8 @@ def initialize():
 
     T=np.ones([nx+1,ny+1])*Temperature
     write_scalar('0/T.txt',T)
-initialize()
+
+#initialize()
 
 
 

@@ -102,8 +102,16 @@ def Streamlines(U_name,V_name,time=-1,show='yes'):
     
     speed=np.sqrt(U**2 + V**2).T
     lw=3*speed**0.3/np.max(speed)
+    # print(Points[0][:,0])
+    # print(Points[1][0,:])
+    # print(U.T.shape)
+    # print(V.T.shape)
+    
     plt.title('Streamlines')
-    plt.streamplot(Points[0][:,0],Points[1][0,:], U.T, V.T, color=speed,linewidth=lw, cmap='Spectral',density=4)#,minlength=dx/10)
+    print(U)
+    print(V)
+    
+    plt.streamplot(Points[0][:,0],Points[1][0,:], U, V, color=speed,linewidth=lw, cmap='Spectral',density=4)#,minlength=dx/10)
     plt.colorbar()
     xmin,xmax=min(Points[0][:,0]),max(Points[0][:,0])
     ymin,ymax=min(Points[1][0,:]),max(Points[1][0,:])
@@ -113,7 +121,9 @@ def Streamlines(U_name,V_name,time=-1,show='yes'):
     plt.show()    
 
 # Contour('U','0',P='yes')
-# Contour('V','0',P='yes')
+# Contour('U',P='yes')
+# Contour('V',P='yes')
 
-# Streamlines('U','V','0')
+Streamlines('U','V','0')
+Streamlines('U','V')
 

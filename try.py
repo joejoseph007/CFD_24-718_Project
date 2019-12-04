@@ -4,7 +4,7 @@ from Initialize import *
 from contour import *
 import copy
 
-# @jit(nopython=True)
+#@jit(nopython=True)
 def transport(T,u,v,dt,dx,dy,alpha):
     nx = T.shape[0]-1
     ny = T.shape[1]-1
@@ -37,7 +37,7 @@ def transport(T,u,v,dt,dx,dy,alpha):
             T[(i,j)]=T[(i,j)]+dt*(rhs-duTdx-dvTdy)
     return T
 
-# @jit(nopython=True)
+#@jit(nopython=True)
 def poisson(P,u,v,dt,dx,dy,rho):
     # u and v are from the "predictor step"
     # P comes from the previous time step
@@ -62,7 +62,7 @@ def poisson(P,u,v,dt,dx,dy,rho):
         U_=(u[(i+1,j)]-u[(i-1,j)])/(dx[(i,j)]+dx[(i-1,j)])
         V_=(v[(i,j+1)]-v[(i,j-1)])/(dy[(i,j)]+dy[(i,j-1)])
         
-        rhs=-rho/dt*(U_+V_)
+        rhs=rho/dt*(U_+V_)
         return rhs
 
     Con = 1e-6
@@ -77,13 +77,13 @@ def poisson(P,u,v,dt,dx,dy,rho):
                 rhs = RHS(u,v,dx,dy,i,j,dt,rho)
                 
                 P[(i,j)]=(frac_x+frac_y)**(-1)*(frac_rx*(P[(i+1,j)]+P[(i-1,j)])+frac_ry*(P[(i,j+1)]+P[(i,j-1)])-rhs)
-        if k == 10000000:# Look into this
+        if k == 1000000:# Look into this
             print('not converged', err)
             break
         err = np.max(np.abs(P-temp))
     return P
 
-# @jit(nopython=True)
+#@jit(nopython=True)
 def Adv(u, v, x, y, i, j, flag): 
     x_1 = x[(i,j)] 
     x_0 = x[(i-1,j)]
@@ -109,7 +109,7 @@ def Adv(u, v, x, y, i, j, flag):
 
         return v_1 + v_2
 
-# @jit(nopython=True)
+#@jit(nopython=True)
 def Diff(u, x, y, i, j):
 
     # u_1 = np.zeros((u.shape[0], u.shape[1]))
@@ -129,7 +129,7 @@ def Diff(u, x, y, i, j):
 
     return u_1 + u_2
 
-# @jit(nopython=True)
+#@jit(nopython=True)
 def predictor(x, y, u, v, T, dt, T_ref, rho, g, nu, beta):
     # Main Predictor Loop
     nx = T.shape[0]
@@ -155,7 +155,7 @@ def predictor(x, y, u, v, T, dt, T_ref, rho, g, nu, beta):
     
     return u_, v_
 
-# @jit(nopython=True)
+#@jit(nopython=True)
 def corrector(x, y, u, v, p, dt, rho):
 
     nx = p.shape[0]
@@ -181,40 +181,45 @@ def corrector(x, y, u, v, p, dt, rho):
     
     return u_, v_
 
+#@jit(nopython=True)
 def BC_update(u, v, p):
     nx = p.shape[0]-1
     ny = p.shape[1]-1
+    # print(nx,ny)
+    # print(u.shape)
+    # print(v.shape)
+    # sys.exit()
     #inlet
     #v[0,:] = v[1,:]
-    v[0,:] = copy.deepcopy(v[1,:])
+    v[0,1:-2] = copy.deepcopy(-v[1,1:-2])
 
-    p[0,:] = copy.deepcopy(p[1,:])
+    p[0,1:-1] = copy.deepcopy(p[1,1:-1])
 
     #bottom
-    u[:,0] =  copy.deepcopy(-u[:,1])
+    u[1:-1,0] =  copy.deepcopy(-u[1:-1,1])
 
-    v[:,0] = 0.
+    v[1:-1,0] = 0.
 
-    p[:,0] = copy.deepcopy(p[:,1])
+    p[1:-1,0] = copy.deepcopy(p[1:-1,1])
 
     #outlet
-    u[nx-1,:] = copy.deepcopy(u[nx-2,:])
-    u[nx,:] = copy.deepcopy(u[nx-1,:])
+    u[nx-1,1:-1] = copy.deepcopy(u[nx-2,1:-1])
+    u[nx,1:-1] = copy.deepcopy(u[nx-1,1:-1])
 
-    v[nx,:] = copy.deepcopy(v[nx-1,:])
+    v[nx,1:-1] = copy.deepcopy(v[nx-1,1:-1])
 
     #top
-    u[:,ny] =  copy.deepcopy(u[:,ny-1])
+    u[1:-1,ny] =  copy.deepcopy(u[1:-1,ny-1])
 
-    v[:,ny-1] =  copy.deepcopy(v[:,ny-2])
-    v[:,ny] =  copy.deepcopy(v[:,ny-1])
+    v[1:-1,ny-1] =  copy.deepcopy(v[1:-1,ny-2])
+    v[1:-1,ny] =  copy.deepcopy(v[1:-1,ny-1])
 
-    p[:,ny] = copy.deepcopy(p[:,ny-1])
+    p[1:-1,ny] = copy.deepcopy(p[1:-1,ny-1])
     return u, v, p
 
 
 
-#@numba.jit(nopython=True, parallel=True)
+#@jit(nopython=True, parallel=True)
 def main():
     rho = 1.225
     T_ref = 300
@@ -222,16 +227,16 @@ def main():
     nu = 1.569e-5
     alpha_T = 2.239e-5
     alpha_pollutant = 2.239e-5
-    total_t = 0.01
+    total_t = 0.001
     t = 0
-    dt = 0.001
+    dt = 0.00001
     g = 10
 
     initialize()
 
-    x,y = read_delta(1)
+    x,y = read_delta(0)
     P, T, u, v = read_all_scalar(0)
-    print(P) 
+    #print(P) 
     #print(T.shape[0], T.shape[1])
 
     running = True
@@ -262,6 +267,10 @@ def main():
     Contour('U', P='yes')
     Contour('V')
     Contour('P')
+    #Streamlines('U','V','0')
+    Streamlines('U','V')
+    
+
     #Contour('T')
 
 
