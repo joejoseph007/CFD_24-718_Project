@@ -42,7 +42,7 @@ def plotting(Points,Scalar,Scalar_name,show='yes',P='no'):
     plt.contourf(Points[0],Points[1],Scalar,20)
     plt.title('Contour of '+Scalar_name)
     plt.colorbar()
-    plt.gca().set_aspect('equal')
+    plt.gca().set_aspect('equal') 
     xmin,xmax=np.min(Points[0]),np.max(Points[0])
     ymin,ymax=np.min(Points[1]),np.max(Points[1])
     plt.xlim([xmin,xmax])
