@@ -26,6 +26,33 @@ def averaging(Scalar,axis=0):
                 Scalar1[i,j]=(Scalar[i,j+1]+Scalar[i+1,j+1])/2                
     return Scalar1
 
+def averaging_grid(Scalar,axis=0):
+    if axis==0: # x axis averaging
+        nx=Scalar.shape[0]-1
+        ny=Scalar.shape[1]-1
+        Scalar1=np.zeros([nx,ny])
+        for i in range(nx):
+            for j in range(ny):
+                Scalar1[i,j]=(Scalar[i+1,j]+Scalar[i+1,j+1])/2
+    if axis==1: # y axis averaging
+        nx=Scalar.shape[0]-1
+        ny=Scalar.shape[1]-1
+        Scalar1=np.zeros([nx,ny])    
+        for i in range(nx):
+            for j in range(ny):
+                Scalar1[i,j]=(Scalar[i,j+1]+Scalar[i+1,j+1])/2                
+    return Scalar1
+
+def average_scalar(Scalar):
+    nx=Scalar.shape[0]-1
+    ny=Scalar.shape[1]-1
+    Scalar1=np.zeros([nx,ny])    
+    for i in range(nx):
+        for j in range(ny):
+            Scalar1[i,j]=(Scalar[i,j]+Scalar[i+1,j]+Scalar[i,j+1]+Scalar[i+1,j+1])/4
+    return Scalar1
+
+
 def Point_average(Points):
     nx=Points.shape[1]-1
     ny=Points.shape[2]-1
@@ -48,13 +75,12 @@ def plotting(Points,Scalar,Scalar_name,show='yes',P='no'):
     plt.ylim([ymin,ymax])    
     if P=='yes':
         print(Scalar)
-
     if show=='yes':
         plt.show()
     else:
         plt.close()
     
-def Contour(Scalar_name,time=-1,show='yes',P='no'): #scalar must be string of what you want to print
+def Contour(Scalar_name,time=-1,show='yes',P='no',grid='no'): #scalar must be string of what you want to print
     #find all times, hence end time
     times=[]
     files=os.listdir('Results')
@@ -68,18 +94,26 @@ def Contour(Scalar_name,time=-1,show='yes',P='no'): #scalar must be string of wh
     else: 
         Scalar=read_scalar('Results/'+str(time)+'/'+Scalar_name+'.txt')
     Points=read_points('Constant/Points.txt')
-    Points=copy.deepcopy(Point_average(Points))
-    if Scalar_name=='U':
-        Scalar=copy.deepcopy(averaging(Scalar,1))
-    elif Scalar_name=='V':
-        Scalar=copy.deepcopy(averaging(Scalar,0))
-    else:
-        Scalar = copy.deepcopy(Scalar[1:-1,1:-1])
-    
+    if grid=='no':
+        Points=copy.deepcopy(Point_average(Points))
+        if Scalar_name=='U':
+            Scalar=copy.deepcopy(averaging(Scalar,1))
+        elif Scalar_name=='V':
+            Scalar=copy.deepcopy(averaging(Scalar,0))
+        else:
+            Scalar = copy.deepcopy(Scalar[1:-1,1:-1])
+    else:      
+        if Scalar_name=='U':
+            Scalar=copy.deepcopy(averaging_grid(Scalar,1))
+        elif Scalar_name=='V':
+            Scalar=copy.deepcopy(averaging_grid(Scalar,0))
+        else:
+            Scalar = copy.deepcopy(average_scalar(Scalar))
+
     plotting(Points,Scalar,Scalar_name,show,P)
 
 
-def Streamlines(U_name,V_name,time=-1,show='yes'):
+def Streamlines(U_name,V_name,time=-1,show='yes',grid='no'):
     times=[]
     files=os.listdir('Results')
     for i in files:
@@ -94,23 +128,22 @@ def Streamlines(U_name,V_name,time=-1,show='yes'):
     else:
         U=read_scalar('Results/'+str(time)+'/'+U_name+'.txt')
         V=read_scalar('Results/'+str(time)+'/'+V_name+'.txt')
-            
+
     Points=read_points('Constant/Points.txt')
-    Points=copy.deepcopy(Point_average(Points))
-    U=copy.deepcopy(averaging(U,1))
-    V=copy.deepcopy(averaging(V,0)) 
+    
+    if grid=='no':
+        Points=copy.deepcopy(Point_average(Points))
+        U=copy.deepcopy(averaging(U,1))
+        V=copy.deepcopy(averaging(V,0)) 
+    else:
+        U=copy.deepcopy(averaging_grid(U,1))
+        V=copy.deepcopy(averaging_grid(V,0)) 
     
     speed=np.sqrt(U**2 + V**2).T
-    lw=3*speed**0.3/np.max(speed)
-    # print(Points[0][:,0])
-    # print(Points[1][0,:])
-    # print(U.T.shape)
-    # print(V.T.shape)
+    lw=1*speed**0.3/np.max(speed)
     
     plt.title('Streamlines')
-    print(U)
-    print(V)
-    
+
     plt.streamplot(Points[0][:,0],Points[1][0,:], U, V, color=speed,linewidth=lw, cmap='Spectral',density=4)#,minlength=dx/10)
     plt.colorbar()
     xmin,xmax=min(Points[0][:,0]),max(Points[0][:,0])
@@ -121,9 +154,13 @@ def Streamlines(U_name,V_name,time=-1,show='yes'):
     plt.show()    
 
 # Contour('U','0',P='yes')
-# Contour('U',P='yes')
+
+# Contour('U',P='yes',grid='yes')
+# Contour('V',P='yes',grid='yes')
+# Contour('P',P='yes',grid='yes')
+
 # Contour('V',P='yes')
 
-# Streamlines('U','V','0')
+# Streamlines('U','V',grid='yes')
 # Streamlines('U','V')
 
