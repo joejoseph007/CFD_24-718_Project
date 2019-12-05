@@ -124,6 +124,6 @@ def Streamlines(U_name,V_name,time=-1,show='yes'):
 # Contour('U',P='yes')
 # Contour('V',P='yes')
 
-Streamlines('U','V','0')
-Streamlines('U','V')
+# Streamlines('U','V','0')
+# Streamlines('U','V')
 

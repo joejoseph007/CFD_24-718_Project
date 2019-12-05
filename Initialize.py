@@ -32,8 +32,8 @@ def initialize():
         print('Running')
     Cons='Constant/'
     Rho=1000
-    N=10
-    M=10
+    N=20
+    M=20
     nx=N+1
     ny=M+1
     xmax=1
@@ -70,7 +70,7 @@ def initialize():
 
     U_in=np.linspace(0,1,ny+1)
     U=np.zeros([nx+1,ny+1])
-    U[0,:]= 1
+    U[0,:]= 0.1
     # print(U)
     write_scalar('0/U.txt',U)
 
