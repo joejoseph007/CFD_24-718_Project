@@ -4,7 +4,7 @@ from Initialize import *
 from contour import *
 import copy
 
-#@jit(nopython=True)
+# @jit(nopython=True)
 def transport(T,u,v,dt,dx,dy,alpha):
     nx = T.shape[0]-1
     ny = T.shape[1]-1
@@ -37,7 +37,7 @@ def transport(T,u,v,dt,dx,dy,alpha):
             T[(i,j)]=T[(i,j)]+dt*(rhs-duTdx-dvTdy)
     return T
 
-#@jit(nopython=True)
+# @jit(nopython=True)
 def poisson(P,u,v,dt,dx,dy,rho):
     # u and v are from the "predictor step"
     # P comes from the previous time step
@@ -83,7 +83,7 @@ def poisson(P,u,v,dt,dx,dy,rho):
         err = np.max(np.abs(P-temp))
     return P
 
-#@jit(nopython=True)
+# @jit(nopython=True)
 def Adv(u, v, x, y, i, j, flag): 
     x_1 = x[(i,j)] 
     x_0 = x[(i-1,j)]
@@ -109,7 +109,7 @@ def Adv(u, v, x, y, i, j, flag):
 
         return v_1 + v_2
 
-#@jit(nopython=True)
+# @jit(nopython=True)
 def Diff(u, x, y, i, j):
 
     # u_1 = np.zeros((u.shape[0], u.shape[1]))
@@ -129,7 +129,7 @@ def Diff(u, x, y, i, j):
 
     return u_1 + u_2
 
-#@jit(nopython=True)
+# @jit(nopython=True)
 def predictor(x, y, u, v, T, dt, T_ref, rho, g, nu, beta):
     # Main Predictor Loop
     nx = T.shape[0]
@@ -155,7 +155,7 @@ def predictor(x, y, u, v, T, dt, T_ref, rho, g, nu, beta):
     
     return u_, v_
 
-#@jit(nopython=True)
+# @jit(nopython=True)
 def corrector(x, y, u, v, p, dt, rho):
 
     nx = p.shape[0]
@@ -181,14 +181,9 @@ def corrector(x, y, u, v, p, dt, rho):
     
     return u_, v_
 
-#@jit(nopython=True)
 def BC_update(u, v, p):
     nx = p.shape[0]-1
     ny = p.shape[1]-1
-    # print(nx,ny)
-    # print(u.shape)
-    # print(v.shape)
-    # sys.exit()
     #inlet
     #v[0,:] = v[1,:]
     v[0,:] = copy.deepcopy(-v[1,:])
@@ -220,7 +215,7 @@ def BC_update(u, v, p):
 
 
 
-#@jit(nopython=True, parallel=True)
+#@numba.jit(nopython=True, parallel=True)
 def main():
     rho = 1.225
     T_ref = 300
@@ -235,7 +230,7 @@ def main():
 
     initialize()
 
-    x,y = read_delta(0)
+    x,y = read_delta(1)
     P, T, u, v = read_all_scalar(0)
     print(P.shape) 
     #print(T.shape[0], T.shape[1])
